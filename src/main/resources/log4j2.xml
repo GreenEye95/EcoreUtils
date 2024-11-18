@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Extra logging related to initialization of Log4j.
+ Set to debug or trace if log4j initialization is failing. -->
+<Configuration status="warn">
+    <!-- This is the root configuration element for the Log4j 2 configuration. The "status" attribute is set to "warn" to control the level of internal Log4j 2 event logging. -->
+    <Appenders>
+        <!-- This section defines the appenders, which are the destinations for the logged messages. -->
+        <!-- Console appender configuration -->
+        <Console name="console" target="SYSTEM_OUT">
+            <!-- This defines a Console appender, which writes the log messages to the console (standard output). -->
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+            <!-- This sets the pattern for the log message layout. The pattern includes the timestamp, log level, class name, line number, and the log message itself. -->
+        </Console>
+    </Appenders>
+    <Loggers>
+        <!-- This section defines the loggers, which are the entities that generate the log messages. -->
+        <!-- Root logger referring to console appender -->
+        <Root level="info" additivity="false">
+            <!-- This defines the root logger, which is the default logger that will be used if a more specific logger is not found. -->
+            <!-- The "level" attribute sets the logging level to "info", which means that only log messages with a severity of "info" or higher will be logged. -->
+            <!-- The "additivity" attribute is set to "false", which means that the log messages will not be passed up to any parent loggers. -->
+            <AppenderRef ref="console" />
+            <!-- This line associates the "console" appender defined earlier with the root logger. -->
+        </Root>
+    </Loggers>
+</Configuration>

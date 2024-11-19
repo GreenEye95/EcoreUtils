@@ -1,5 +1,8 @@
 package org.khachouch;
 
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.SourceStringReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.eclipse.emf.codegen.ecore.generator.Generator;
@@ -16,6 +19,10 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.uml2.uml.Model;
+import org.eclipse.uml2.uml.PackageableElement;
+import org.eclipse.uml2.uml.UMLFactory;
+import org.eclipse.uml2.uml.internal.resource.UMLResourceFactoryImpl;
 import org.eclipse.xsd.*;
 import org.eclipse.xsd.ecore.EcoreSchemaBuilder;
 import org.eclipse.xsd.ecore.XSDEcoreBuilder;
@@ -574,5 +581,119 @@ public class EcoreUtilsImpl implements EcoreUtils {
         // Return true to indicate that the method has completed successfully.
         // Note: In this case, success is assumed, regardless of whether the generation actually worked.
         return true;
+    }
+    public boolean ConvertEcoreToUML(String ecoreFilePath, String svgFilePath) {
+        // Step 1: Load the Ecore model from the specified file
+        ResourceSet resourceSet = new ResourceSetImpl();
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
+
+        Resource ecoreResource = resourceSet.getResource(URI.createFileURI(new File(ecoreFilePath).getAbsolutePath()), true);
+
+        // Step 2: Generate PlantUML text from the Ecore model
+        String plantUMLText = generatePlantUMLTextFromEcore(ecoreResource);
+
+        // Step 3: Use PlantUML to generate an SVG diagram from the PlantUML text
+        return generateSVGFromPlantUML(plantUMLText, svgFilePath);
+    }
+
+    /**
+     * Generates PlantUML text from an Ecore model resource.
+     *
+     * @param ecoreResource The Ecore model resource to be converted to PlantUML text.
+     * @return A string containing the PlantUML representation of the Ecore model.
+     */
+    private String generatePlantUMLTextFromEcore(Resource ecoreResource) {
+        // Initialize a StringBuilder to construct the PlantUML text
+        StringBuilder plantUMLText = new StringBuilder();
+
+        // Start the PlantUML diagram
+        plantUMLText.append("@startuml\n");
+
+        // Set the size of class attribute icons to 0 (no icons)
+        plantUMLText.append("skinparam classAttributeIconSize 0\n");
+
+        // Use orthogonal lines to reduce entanglement in the diagram
+        plantUMLText.append("skinparam linetype ortho\n");
+
+        // Arrange elements from top to bottom to reflect hierarchical structure
+        plantUMLText.append("top to bottom direction\n");
+
+        // Iterate over the contents of the Ecore resource
+        for (EObject eObject : ecoreResource.getContents()) {
+            // Check if the object is an instance of EPackage
+            if (eObject instanceof EPackage) {
+                EPackage ePackage = (EPackage) eObject;
+
+                // Start a new package in the PlantUML diagram
+                plantUMLText.append("package ").append(ePackage.getName()).append(" {\n");
+
+                // Iterate over the classifiers in the package
+                for (EClassifier eClassifier : ePackage.getEClassifiers()) {
+                    // Check if the classifier is an instance of EClass
+                    if (eClassifier instanceof EClass) {
+                        EClass eClass = (EClass) eClassifier;
+
+                        // Define a new class in the PlantUML diagram
+                        plantUMLText.append("class ").append(eClass.getName()).append(" {\n");
+
+                        // Iterate over the attributes of the class
+                        for (EAttribute eAttribute : eClass.getEAttributes()) {
+                            // Add each attribute to the class definition in PlantUML
+                            plantUMLText.append("  ").append(eAttribute.getName()).append(" : ").append(eAttribute.getEType().getName()).append("\n");
+                        }
+
+                        // Close the class definition
+                        plantUMLText.append("}\n");
+
+                        // Add super types (inheritance relationships)
+                        for (EClass superType : eClass.getESuperTypes()) {
+                            plantUMLText.append(eClass.getName()).append(" --|> ").append(superType.getName()).append("\n");
+                        }
+
+                        // Add references (associations)
+                        for (EReference eReference : eClass.getEReferences()) {
+                            plantUMLText.append(eClass.getName()).append(" --> ").append(eReference.getEType().getName()).append(" : ").append(eReference.getName()).append("\n");
+                        }
+                    }
+                }
+
+                // Close the package definition
+                plantUMLText.append("}\n");
+            }
+        }
+
+        // End the PlantUML diagram
+        plantUMLText.append("@enduml\n");
+
+        // Return the constructed PlantUML text
+        return plantUMLText.toString();
+    }
+    private boolean generateSVGFromPlantUML(String plantUMLText, String svgFilePath) {
+        SourceStringReader reader = new SourceStringReader(plantUMLText);
+        try (OutputStream outputStream = new FileOutputStream(new File(svgFilePath))) {
+            String desc = reader.generateImage(outputStream, new FileFormatOption(FileFormat.SVG));
+            return desc != null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * Checks if the Java version is at least the specified version.
+     * This is used to handle Java module access issues in newer versions of Java.
+     *
+     * @param version The version to check against (e.g., 9 for Java 9+).
+     * @return true if the Java version is at least the specified version, false otherwise.
+     */
+    private boolean isJavaVersionAtLeast(int version) {
+        String versionString = System.getProperty("java.version");
+        try {
+            int javaVersion = Integer.parseInt(versionString.split("\\.")[0]);
+            return javaVersion >= version;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

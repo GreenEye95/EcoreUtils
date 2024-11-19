@@ -12,4 +12,5 @@ public interface EcoreUtils {
     public void PrintEcoreStructure(String ecoreFilePath);
     public boolean ConvertEcoreToXMI(String ecorePath, String xmiDestinationPath);
     public boolean ConvertEcoreToXSD(String ecoreFilePath, String xsdFilePath);
+    public boolean ConvertEcoreToUML(String ecoreFilePath, String svgFilePath);
 }

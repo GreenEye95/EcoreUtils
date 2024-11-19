@@ -47,6 +47,19 @@
             <version>2.3.0-v200706262000</version>
         </dependency>
 
+        <!-- UML dependencies -->
+        <dependency>
+            <groupId>org.eclipse.uml2</groupId>
+            <artifactId>org.eclipse.uml2.uml</artifactId>
+            <version>3.1.0.v201006071150</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.plantuml</groupId>
+            <artifactId>plantuml</artifactId>
+            <version>8059</version>
+        </dependency>
+
+
         <!-- Logging dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

@@ -31,6 +31,10 @@
 - **Ecore to XSD Conversion:**  
   Export an Ecore model to an XSD file with the `ConvertEcoreToXSD()` method, facilitating the integration of EMF models into XML-based workflows.
 
+- **Ecore to XSD Conversion:**  
+  Export an svg file of uml representation with the `ConvertEcoreToUML()` method.
+
+  
 ## Usage
 
 This library provides a simple and clean API to interact with Ecore models, GenModels, and other related artifacts in the EMF ecosystem. Whether you're building a tool for model-driven development or need to convert between different model formats (Ecore, XSD, XMI), **EcoreUtils** offers a reliable solution.
@@ -58,3 +62,6 @@ boolean isValid = utils.validateModel("modelString", "path/to/metamodel.ecore");
 
 // Convert Ecore to XMI
 boolean convertedToXMI = utils.ConvertEcoreToXMI("path/to/model.ecore", "path/to/output.xmi");
+
+// Convert Ecore to UML
+boolean convertedToUML = utils.ConvertEcoreToUML("path/to/model.ecore","path/to/output.svg")
